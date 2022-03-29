@@ -1,0 +1,7 @@
+P, Cálculo Diferencial, 1200, 1, 1-10-2021
+P, Cálculo Diferencial, 1200, 2, 1-10-2021
+P, Redes de Computadores, 3400, 1, 1-10-2021
+P, Operating Systems, 2233, 1, 1-10-2021
+P, Operating Systems, 2233, 1, 1-10-2021
+D, Operating Systems, 2233, 1, 1-10-2021
+D, Cálculo Diferencial, 1200, 2, 1-10-2021
