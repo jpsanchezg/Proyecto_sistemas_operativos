@@ -1,9 +1,29 @@
 /* Inclusión de archivos */
 #include "pipes.h"
 
-struct Noticia{
+struct Noticia
+{
+    char tipo;
     char titulo[TAM_NOTICIA];
-    char autor[TAM_STRING];
-    char texto[TAM_STRING];
 };
+
+struct Pipe
+{
+    int fd;
+    char nombrePipe[TAM_STRING];
+};
+
+struct subscripcion
+{
+    struct Noticia *noticias;
+};
+
+int main(int arg, char *args[])
+{
+    
+}
+
+void publicar(struct Noticia *noticia, struct Pipe *pipe)
+{
+    write(pipe->fd, noticia, sizeof(struct Noticia));
 }
