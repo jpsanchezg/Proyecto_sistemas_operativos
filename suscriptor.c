@@ -94,6 +94,31 @@ int main(int argc, char *args[])
         manejoPipes();
     }
 }
+void mostrarnoticias()
+{
+    int fd;
+    int tam;
+    char buffer[TAM_NOTICIA];
+    fd = open(nombrePipeReceptor, O_RDONLY);
+    if (fd == -1)
+    {
+        printf("No se pudo abrir el pipe %s\n", nombrePipeReceptor);
+        exit(1);
+    }
+    while (1)
+    {
+        tam = read(fd, buffer, TAM_NOTICIA);
+        if (tam == 0)
+        {
+            printf("No hay noticias\n");
+            break;
+        }
+        else
+        {
+            printf("%s\n", buffer);
+        }
+    }
+}
 
 void suscribirseANuevaNoticia()
 {
