@@ -1,6 +1,11 @@
 
 #include "pipes.h"
 
+struct subscripcion
+{
+    char Noticia *noticias;
+};
+
 void recibirnoticia(struct Noticia *noticia, struct Pipe *pipe)
 {
     read(pipe->fd, noticia, sizeof(struct Noticia));

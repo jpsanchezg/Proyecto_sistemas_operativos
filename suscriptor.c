@@ -7,10 +7,6 @@ char nombrePipeReceptor[TAM_STRING - 70];
 char nombreArchivoInstrucciones[TAM_STRING - 70];
 int pipeReceptor;
 int pipeRespuesta;
-struct subscripcion
-{
-    char Noticia *noticias;
-};
 
 int menu()
 {
@@ -123,18 +119,18 @@ void mostrarnoticias()
 void suscribirseANuevaNoticia()
 {
     printf("Ingrese el tipo de noticia: \n");
-    printf("1. Noticia de prensa\n");
-    printf("2. Noticia de internet\n");
+    printf("A. Noticia de Arte\n");
+    printf("E. Noticia de Farandula y espectaculos\n");
+    printf("C. Noticia de ciencia\n");
+    printf("P. Noticia de politica\n");
+    printf("S. Noticia de sucesos\n");
     scanf("%c", &tipo_noticia);
-    printf("Ingrese el titulo de la noticia: \n");
-    scanf("%s", titulo_noticia);
-    generarSolicitudSuscripcion(tipo_noticia, titulo_noticia);
+    generarSolicitudSuscripcion(tipo_noticia );
 }
 
-void generarSolicitudSuscripcion(char tipo_noticia, char titulo_noticia[])
+void generarSolicitudSuscripcion(char tipo_noticia)
 {
-    struct Noticia noticia;
-    noticia.tipo = tipo_noticia;
-    strcpy(noticia.titulo, titulo_noticia);
-    write(pipeReceptor, &noticia, sizeof(struct Noticia));
+    struct subscripcion subscripcion;
+    subscripcion.tipo_noticia = tipo_noticia;
+    write(pipeReceptor, &subscripcion, sizeof(struct subscripcion));
 }
