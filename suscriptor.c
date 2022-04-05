@@ -8,6 +8,11 @@ char nombreArchivoInstrucciones[TAM_STRING - 70];
 int pipeReceptor;
 int pipeRespuesta;
 
+struct subscipcion {
+    char tipo;
+    int pipe;
+};
+
 int menu()
 {
     int seleccion;

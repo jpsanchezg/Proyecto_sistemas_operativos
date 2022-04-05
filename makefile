@@ -9,3 +9,12 @@ suscriptor: suscriptor.o sistemadecomunicacion.o
 sistemadecomunicacion: sistemadecomunicacion.o
 	@gcc -o sistemadecomunicacion.exe sistemadecomunicacion.o -lpthread
 
+publicador: publicador.o sistemadecomunicacion.o
+	@gcc -o publicador.exe publicador.o sistemadecomunicacion.o -lpthread
+
+
+main: publicador.exe suscriptor.exe sistemadecomunicacion.exe
+	@./publicador.exe & ./suscriptor.exe & ./sistemadecomunicacion.exe
+
+clean:
+	@rm -f publicador.exe suscriptor.exe sistemadecomunicacion.exe publicador.o suscriptor.o sistemadecomunicacion.o
