@@ -15,20 +15,40 @@
 /* Definición de constantes */
 #define TAM_STRING 100
 #define TAM_NOTICIA 80
-#define MAX_EJEMPLARES 10
-#define TAM_ISBN 5
-#define TAM_EJEMPLAR 5
-#define APERTURA_PIPE 'A'
-#define CIERRE_PIPE 'C'
-#define DEVOLVER 'D'
-#define RENOVAR 'R'
-#define SOLICITAR 'P'
-#define POSITIVO 'T'
-#define NEGATIVO 'F'
-#define DISPONIBLE 'D'
-#define PRESTADO 'P'
-#define DELIM ","
+#define MAXCARACT 640
+#define LIMCHAR 50
 
 const char ANIM_CARGA[] = {'/', '-', '\\', '|', '\0'};
+
+struct News
+{
+    char category[TAM_STRING];
+    char title[MAXCARACT];
+};
+
+struct ArgPublisher
+{
+    char pipePSC[LIMCHAR];
+    char file[LIMCHAR];
+    double timeN;
+};
+
+struct ArgSistem
+{
+    char pipePSC[LIMCHAR];
+    char pipeSSC[LIMCHAR];
+    double timeF;
+};
+
+struct ArgSubscriber
+{
+    char pipeSSC[LIMCHAR];
+};
+
+struct subscriber
+{
+    int id, selected;
+    int categoryNews[5];
+};
 
 #endif

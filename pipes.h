@@ -3,17 +3,18 @@
 
 /* Inclusión de archivos */
 #include "precompiler.h"
+#include <errno.h>
 #define TAM_PIPES 100
 
 /* Funciones */
 /**************************************************************************
-*   Función:   limpiarTerminal()
-*   Proposito:  Rutina para limpiar el terminal
-*   Argumentos: 
-*       void
-*   Retorno:
-*       void
-**************************************************************************/
+ *   Función:   limpiarTerminal()
+ *   Proposito:  Rutina para limpiar el terminal
+ *   Argumentos:
+ *       void
+ *   Retorno:
+ *       void
+ **************************************************************************/
 void limpiarTerminal()
 {
     printf("\033[2J");
@@ -21,16 +22,16 @@ void limpiarTerminal()
 }
 
 /**************************************************************************
-*   Función:   abrirPipe()
-*   Proposito:  Rutina para abrir el pipe que tiene el nombre pasado
-*               por parametro, en caso de no estar creado se pone a 
-*               esperar a que sea abierto.
-*   Argumentos:
-*       nombrePipe: Cadena de caracteres que tiene el nombre del pipe
-*                   que se va a abrir.
-*   Retorno:
-*       int: Se retorna descriptor del pipe que es abierto.
-**************************************************************************/
+ *   Función:   abrirPipe()
+ *   Proposito:  Rutina para abrir el pipe que tiene el nombre pasado
+ *               por parametro, en caso de no estar creado se pone a
+ *               esperar a que sea abierto.
+ *   Argumentos:
+ *       nombrePipe: Cadena de caracteres que tiene el nombre del pipe
+ *                   que se va a abrir.
+ *   Retorno:
+ *       int: Se retorna descriptor del pipe que es abierto.
+ **************************************************************************/
 int abrirPipe(char nombrePipe[TAM_STRING])
 {
     int fd;
@@ -52,21 +53,21 @@ int abrirPipe(char nombrePipe[TAM_STRING])
         }
     } while (fd == -1);
     limpiarTerminal();
-    //printf("Se ha abierto el pipe %s\n", nombrePipe);
+    // printf("Se ha abierto el pipe %s\n", nombrePipe);
     sleep(1);
     return fd;
 } // fin abrirPipe
 
 /**************************************************************************
-*   Función:   crearPipe()
-*   Proposito:  Rutina para crear y abrir el pipe que tiene el nombre
-*                pasado por parametro.
-*   Argumentos:
-*       nombrePipe: Cadena de caracteres que tiene el nombre del pipe
-*                   que se va a abrir.
-*   Retorno:
-*       int: Se retorna descriptor del pipe que es creado y abierto.
-**************************************************************************/
+ *   Función:   crearPipe()
+ *   Proposito:  Rutina para crear y abrir el pipe que tiene el nombre
+ *                pasado por parametro.
+ *   Argumentos:
+ *       nombrePipe: Cadena de caracteres que tiene el nombre del pipe
+ *                   que se va a abrir.
+ *   Retorno:
+ *       int: Se retorna descriptor del pipe que es creado y abierto.
+ **************************************************************************/
 int crearPipe(char nombrePipe[])
 {
     int fd;
@@ -77,18 +78,87 @@ int crearPipe(char nombrePipe[])
     return fd;
 } // fin crearPipe
 
-/**************************************************************************
-*   Función:   leerPipe()
-*   Proposito:  Rutina para leer el pipe que se pasa por parametro.
-*   Argumentos:
-*       fd: Descriptor del pipe que se va a leer.
-*       mensaje: Cadena de caracteres donde se almacenara lo leído.
-*   Retorno:
-*       void
-**************************************************************************/
-void leerPipe(int fd, char mensaje[TAM_STRING])
+void sendPipe(char pipe[], int countNews, struct News publication[TAM_STRING])
 {
-    while (read(fd, mensaje, TAM_STRING) == 0);
-} // fin leerPipe
+    int creado, fd;
+    do
+    {
+        fd = open(pipe, O_WRONLY | O_NONBLOCK);
+        if (fd == -1)
+            sleep(1);
+    } while (fd == -1);
+    write(fd, &countNews, sizeof(int));
+    write(fd, publication, sizeof(publication) * countNews);
+    close(fd);
+}
+
+/**************************************************************************
+ *   Función:   leerPipe()
+ *   Proposito:  Rutina para leer el pipe que se pasa por parametro.
+ *   Argumentos:
+ *       fd: Descriptor del pipe que se va a leer.
+ *       mensaje: Cadena de caracteres donde se almacenara lo leído.
+ *   Retorno:
+ *       void
+ **************************************************************************/
+
+void leerPipePubli(char *pipe, int fd)
+{
+    struct Noti noticias[100];
+
+    int n, bytes, bytes2;
+
+    bytes = read(fd, &n, sizeof(int));
+
+    bytes2 = read(fd, noticias, sizeof(struct Noti) * n);
+
+    ordenarNoticias(noticias, n);
+}
+
+void pipePubli(char *pipe)
+{
+    while (true)
+    {
+        int fd = open(pipe, O_RDONLY);
+        leerPipePubli(pipe, fd);
+        printf("----Publicacion agregada----\n");
+        temporizador = 0;
+        mostrarPublicacionNueva();
+        close(fd);
+    }
+}
+
+int leerPipeSus(char *pipe, int fd)
+{
+    int Seleccionadas[5];
+
+    int pid, n, bytes, bytes2, bytepid;
+
+    bytepid = read(fd, &pid, sizeof(int));
+    bytes = read(fd, &n, sizeof(int));
+    bytes2 = read(fd, Seleccionadas, sizeof(int) * n);
+
+    sus[numSuscriptores].id = pid;                  // Se guarda el ID del suscriptor
+    sus[numSuscriptores].cantidadSeleccionadas = n; // Se guarda la cantidad de noticias que selecciono el suscriptor
+    for (int i = 0; i < n; i++)
+    {
+        sus[numSuscriptores].seleccionadas[i] = Seleccionadas[i]; // Se guarda las noticias que selecciono el suscriptor
+    }
+    numSuscriptores++; // Se aumenta el numero de suscriptores
+
+    return bytes2;
+}
+
+void pipeSus(char *pipe)
+{
+    while (true)
+    {
+        int fd = open(pipe, O_RDONLY);
+        leerPipeSus(pipe, fd);
+        printf("---Suscriptor agregado---\n");
+        mostrarPubliNuevoSus();
+        close(fd);
+    }
+}
 
 #endif

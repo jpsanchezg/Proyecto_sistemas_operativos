@@ -1,141 +1,146 @@
 #include "pipes.h"
 
-char salir = 0;
-char errorArgumentos = 0;
-char nombrePipeRespuesta[TAM_STRING - 70];
-char nombrePipeReceptor[TAM_STRING - 70];
-char nombreArchivoInstrucciones[TAM_STRING - 70];
-int pipeReceptor;
-int pipeRespuesta;
+int Seleccionadas[5];
+int contador = 0;
 
-struct subscipcion {
-    char tipo;
-    int pipe;
-};
-
-int menu()
+struct argumentosSus leerArgumentos(int cantidadArgumentos, char *arregloArgumentos[])
 {
-    int seleccion;
-    // limpiarTerminal();
-    printf("=========================================================================\n");
-    printf("                  Suscripcion de noticias\n");
-    printf("=========================================================================\n");
-    printf("               1. Suscribirse a una nueva noticia\n");
-    printf("               2. Mostrar noticias\n");
-    printf("               0. salir\n");
-    printf("=========================================================================\n");
-    scanf("%d", &seleccion);
-    return seleccion;
-}
-void salidaSuscriptor()
-{
-    if (!errorArgumentos)
+    struct argumentosSus tempArgumentos;
+    if (cantidadArgumentos != 3)
     {
-        generarSolicitudCierrePipe();
+        errno = 8;
+        perror("ERROR: Cantidad equivocada de argumentos");
     }
-    close(pipeRespuesta);
-    close(pipeReceptor);
-    unlink(nombrePipeRespuesta);
+    else
+    {
+        for (int i = 0; i < cantidadArgumentos; i++)
+        {
+            if (strcmp(arregloArgumentos[i], "-s") == 0)
+            {
+                strcpy(tempArgumentos.pipeSSC, arregloArgumentos[i + 1]);
+            }
+        }
+        return tempArgumentos;
+    }
 }
 
-unsigned char atenderArgumentosSuscriptor(int argc, char *args[])
+void SeleccionCat()
 {
-    unsigned char correcto = 0;
-    char bandera = 0;
-    for (int i = 1; i < argc; i++)
+
+    char opcion;
+    char Continuar;
+    int salir = 1;
+
+    while (salir == 1)
     {
-        if (strcmp(args[i], "-s") == 0)
+        printf("Indique el numero segun la noticia que desea ver \n");
+        printf("1. Arte \n");
+        printf("2. Espectaculo \n");
+        printf("3. ciencia \n");
+        printf("4. Politica \n");
+        printf("5. Sucesos \n");
+
+        scanf("%s", &opcion);
+
+        if (isdigit(opcion))
         {
-            bandera = 1;
-            i++;
-            if (i < argc)
+            if ((atoi(&opcion)) > 0 && (atoi(&opcion)) <= 5)
             {
-                strcpy(nombrePipeReceptor, args[i]);
-                if (correcto != 2)
-                    correcto = 1;
+                int validador = 0;
+                for (int i = 0; i < contador; i++)
+                {
+                    if (Seleccionadas[i] == atoi(&opcion))
+                    {
+                        validador = 1;
+                        errno = 22;
+                        perror("Opcion seleccionada anteriormente");
+                    }
+                }
+                if (validador == 0)
+                {
+                    Seleccionadas[contador] = atoi(&opcion);
+                    contador++;
+                }
             }
             else
             {
-                printf("Argumento incompleto: \n");
-                printf("Falta el nombre del pipe receptor, solo se puso -s\n");
-                printf("./suscriptor -s pipeReceptor\n");
-                correcto = 0;
-                break;
+                errno = 22;
+
+                perror("Numero invalido");
             }
-        }
-        else if (args[i][0] == '-')
-        {
-            printf("Argumentos incorrectos: \n");
-            printf("Opción incorrecta solo es valido usar -s para el nombre del receptor\n");
-            printf("./suscriptor -s pipeReceptor\n");
-        }
-    }
-    if (!bandera)
-    {
-        printf("Argumentos incompletos: \n");
-        printf("Falta el nombre del pipe receptor\n");
-        printf("./suscriptor -s pipeReceptor\n");
-    }
-    return correcto;
-} // fin atenderArgumentosSolicitante
-
-int main(int argc, char *args[])
-{
-    int seleccion;
-    char selector_modo_suscriptor;
-    char tipo_noticia;
-    char titulo_noticia[TAM_NOTICIA];
-
-    atexit(salidaSuscriptor);
-
-    selector_modo_suscriptor = atenderArgumentosSuscriptor(argc, args);
-
-    if (selector_modo_suscriptor)
-    {
-        manejoPipes();
-    }
-}
-void mostrarnoticias()
-{
-    int fd;
-    int tam;
-    char buffer[TAM_NOTICIA];
-    fd = open(nombrePipeReceptor, O_RDONLY);
-    if (fd == -1)
-    {
-        printf("No se pudo abrir el pipe %s\n", nombrePipeReceptor);
-        exit(1);
-    }
-    while (1)
-    {
-        tam = read(fd, buffer, TAM_NOTICIA);
-        if (tam == 0)
-        {
-            printf("No hay noticias\n");
-            break;
         }
         else
         {
-            printf("%s\n", buffer);
+            errno = 22;
+            perror("Valor ingresado no es un numero");
         }
+
+        int validador2 = 0;
+        while (validador2 == 0)
+        {
+
+            printf("Si desea agregar otra categoria Introduzca 1 sino introduzca 2: ");
+            scanf("%s", &Continuar);
+
+            if (isdigit(Continuar))
+            {
+                if ((atoi(&Continuar)) == 1 || (atoi(&Continuar)) == 2)
+                {
+                    validador2 = 1;
+                }
+                else
+                {
+                    errno = 22;
+                    perror("Numero invalido");
+                }
+            }
+            else
+            {
+                errno = 22;
+                perror("Valor ingresado no es un numero");
+            }
+        }
+        if (atoi(&Continuar) == 2)
+        {
+            salir = 2;
+        }
+        else
+        {
+            salir = 1;
+        }
+    }
+
+    for (int i = 0; i < contador; i++)
+    {
+        printf("Opcion %d:%d \n", i + 1, Seleccionadas[i]);
     }
 }
 
-void suscribirseANuevaNoticia()
+void EnviarPipe(char pipe[])
 {
-    printf("Ingrese el tipo de noticia: \n");
-    printf("A. Noticia de Arte\n");
-    printf("E. Noticia de Farandula y espectaculos\n");
-    printf("C. Noticia de ciencia\n");
-    printf("P. Noticia de politica\n");
-    printf("S. Noticia de sucesos\n");
-    scanf("%c", &tipo_noticia);
-    generarSolicitudSuscripcion(tipo_noticia );
+    int creado, fd;
+    do
+    {
+        fd = open(pipe, O_WRONLY | O_NONBLOCK);
+        if (fd == -1)
+            sleep(1);
+    } while (fd == -1);
+    int pid = getpid();
+    write(fd, &pid, sizeof(int));
+    write(fd, &contador, sizeof(int));
+    write(fd, Seleccionadas, sizeof(Seleccionadas) * contador);
+    close(fd);
 }
 
-void generarSolicitudSuscripcion(char tipo_noticia)
+int main(int argc, char const *argv[])
 {
-    struct subscripcion subscripcion;
-    subscripcion.tipo_noticia = tipo_noticia;
-    write(pipeReceptor, &subscripcion, sizeof(struct subscripcion));
+    SeleccionCat();
+    struct argumentosSus entradaArgumentos;
+    entradaArgumentos = leerArgumentos(argc, argv);
+    EnviarPipe(entradaArgumentos.pipeSSC);
+    while (true)
+    {
+        // simulacion de suscriptor esperando
+    }
+    return 0;
 }

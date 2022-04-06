@@ -18,3 +18,8 @@ main: publicador.exe suscriptor.exe sistemadecomunicacion.exe
 
 clean:
 	@rm -f publicador.exe suscriptor.exe sistemadecomunicacion.exe publicador.o suscriptor.o sistemadecomunicacion.o
+
+	build:
+	@gcc -pthread -o publicador.o publicador.c
+	@gcc -pthread -o sistema.o sistema.c
+	@gcc -pthread -o suscriptor.o suscriptor.c
